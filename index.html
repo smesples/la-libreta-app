@@ -1,22 +1,70 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>La Libreta</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Libreta - Consorcio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body>
-  <div id="root"></div>
-  
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<body class="bg-gray-50">
+    <div id="root"></div>
 
-  <script type="text/babel" data-type="module">
-    import App from './App.jsx';
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+    <script type="text/babel">
+        // Pegamos aquí el código de la App simplificado para que no falle
+        const { useState, useMemo } = React;
+
+        const App = () => {
+            const [transacciones, setTransacciones] = useState([]);
+            
+            const metrics = useMemo(() => {
+                const comprasStock = transacciones
+                    .filter(t => t.tipo === 'gasto' && (t.cat === 'mercaderia' || t.cat === 'materia_prima'))
+                    .reduce((acc, t) => acc + t.monto, 0);
+                const ventasTotales = transacciones
+                    .filter(t => t.tipo === 'ingreso' && t.cat === 'venta')
+                    .reduce((acc, t) => acc + t.monto, 0);
+                const efectivoCaja = transacciones
+                    .filter(t => t.tipo === 'ingreso' && t.pago === 'contado')
+                    .reduce((acc, t) => acc + t.monto, 0) - 
+                    transacciones.filter(t => t.tipo === 'gasto').reduce((acc, t) => acc + t.monto, 0);
+                const ventasPendientes = transacciones
+                    .filter(t => t.tipo === 'ingreso' && t.pago === 'a_cuenta')
+                    .reduce((acc, t) => acc + t.monto, 0);
+
+                const S = comprasStock - ventasTotales;
+                const stockAbs = Math.abs(S);
+                const fortalezaTotal = stockAbs + efectivoCaja + ventasPendientes;
+
+                return { stockAbs, fortalezaTotal, esExcedente: S < 0 };
+            }, [transacciones]);
+
+            return (
+                <div className="p-8">
+                    <h1 className="text-2xl font-bold mb-4">La Libreta</h1>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div className="p-6 bg-white rounded shadow-sm border-l-4 border-blue-500">
+                            <p className="text-sm text-gray-500 uppercase font-bold">Fortaleza Total</p>
+                            <p className="text-3xl font-bold">${metrics.fortalezaTotal.toLocaleString()}</p>
+                        </div>
+                        <div className="p-6 bg-white rounded shadow-sm border-l-4 border-green-500">
+                            <p className="text-sm text-gray-500 uppercase font-bold">Stock Absoluto</p>
+                            <p className="text-3xl font-bold">${metrics.stockAbs.toLocaleString()}</p>
+                            <p className="text-xs text-green-600 mt-1">{metrics.esExcedente ? '✓ Excedente de Valor' : ''}</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-4">
+                        <button onClick={() => setTransacciones([...transacciones, {tipo:'gasto', cat:'mercaderia', monto:10000, pago:'contado'}])} className="bg-red-500 text-white px-4 py-2 rounded">Simular Gasto $10k</button>
+                        <button onClick={() => setTransacciones([...transacciones, {tipo:'ingreso', cat:'venta', monto:15000, pago:'contado'}])} className="bg-green-500 text-white px-4 py-2 rounded">Simular Venta $15k</button>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
