@@ -68,6 +68,7 @@
      "usuarioId": { 
       "type": "string",
       "description": "ID único del productor para la prueba piloto"
+   }
   },
   "required": [
     "tipo",
