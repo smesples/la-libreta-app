@@ -64,11 +64,15 @@
       "type": "boolean",
       "default": true,
       "description": "Si el gasto pertenece al negocio (true) o al hogar (false)"
-    }
+    },
+     "usuarioId": { 
+      "type": "string",
+      "description": "ID único del productor para la prueba piloto"
   },
   "required": [
     "tipo",
     "monto",
-    "fecha"
+    "fecha",
+   "usuarioId"
   ]
 }
