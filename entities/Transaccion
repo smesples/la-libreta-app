@@ -4,48 +4,31 @@
   "properties": {
     "tipo": {
       "type": "string",
-      "enum": [
-        "ingreso",
-        "gasto"
-      ],
-      "description": "Tipo de transacci\u00f3n"
+      "enum": ["ingreso", "gasto"],
+      "description": "Tipo de transacción"
     },
     "categoria": {
       "type": "string",
       "enum": [
-        "venta",
-        "servicio",
-        "otro_ingreso",
-        "materia_prima",
-        "empaque",
-        "mercaderia",
-        "envios",
-        "servicios_negocio",
-        "alquiler_negocio",
-        "salarios",
-        "publicidad",
-        "otros_gastos_negocio",
-        "alimentacion",
-        "servicios_hogar",
-        "alquiler_hogar",
-        "salud",
-        "educacion",
-        "otros_gastos_hogar"
+        "venta", "servicio", "otro_ingreso", "materia_prima", "empaque", 
+        "mercaderia", "envios", "servicios_negocio", "alquiler_negocio", 
+        "salarios", "publicidad", "otros_gastos_negocio", "alimentacion", 
+        "servicios_hogar", "alquiler_hogar", "salud", "educacion", "otros_gastos_hogar"
       ],
-      "description": "Categor\u00eda de la transacci\u00f3n"
+      "description": "Categoría de la transacción"
     },
     "monto": {
       "type": "number",
-      "description": "Monto de la transacci\u00f3n"
+      "description": "Monto de la transacción"
     },
     "descripcion": {
       "type": "string",
-      "description": "Descripci\u00f3n opcional"
+      "description": "Descripción opcional"
     },
     "fecha": {
       "type": "string",
       "format": "date",
-      "description": "Fecha de la transacci\u00f3n"
+      "description": "Fecha de la transacción"
     },
     "es_costo_fijo": {
       "type": "boolean",
@@ -54,10 +37,7 @@
     },
     "modalidad_pago": {
       "type": "string",
-      "enum": [
-        "contado",
-        "a_cuenta"
-      ],
+      "enum": ["contado", "a_cuenta"],
       "description": "Modalidad de pago para ingresos"
     },
     "es_gasto_negocio": {
@@ -65,15 +45,16 @@
       "default": true,
       "description": "Si el gasto pertenece al negocio (true) o al hogar (false)"
     },
-     "usuarioId": { 
-      "type": "string",
-      "description": "ID único del productor para la prueba piloto"
-   }
+    "usuarioId": { 
+      "type": "string", 
+      "description": "ID único del productor para la prueba piloto" 
+    }
   },
   "required": [
     "tipo",
+    "categoria",
     "monto",
     "fecha",
-   "usuarioId"
+    "usuarioId"
   ]
 }
