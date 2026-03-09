@@ -17,12 +17,14 @@
     "cantidad_stock": {
       "type": "number",
       "description": "Cantidad en inventario"
-    }
-  },
+    },
+    "usuarioId": { "type": "string" }
+    },
   "required": [
     "nombre",
     "costo_unitario",
     "precio_venta",
-    "cantidad_stock"
+    "cantidad_stock",
+    "usuarioId"
   ]
 }
