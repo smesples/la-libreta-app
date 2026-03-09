@@ -1,0 +1,74 @@
+{
+  "name": "Transaccion",
+  "type": "object",
+  "properties": {
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "ingreso",
+        "gasto"
+      ],
+      "description": "Tipo de transacci\u00f3n"
+    },
+    "categoria": {
+      "type": "string",
+      "enum": [
+        "venta",
+        "servicio",
+        "otro_ingreso",
+        "materia_prima",
+        "empaque",
+        "mercaderia",
+        "envios",
+        "servicios_negocio",
+        "alquiler_negocio",
+        "salarios",
+        "publicidad",
+        "otros_gastos_negocio",
+        "alimentacion",
+        "servicios_hogar",
+        "alquiler_hogar",
+        "salud",
+        "educacion",
+        "otros_gastos_hogar"
+      ],
+      "description": "Categor\u00eda de la transacci\u00f3n"
+    },
+    "monto": {
+      "type": "number",
+      "description": "Monto de la transacci\u00f3n"
+    },
+    "descripcion": {
+      "type": "string",
+      "description": "Descripci\u00f3n opcional"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de la transacci\u00f3n"
+    },
+    "es_costo_fijo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si es un costo fijo mensual"
+    },
+    "modalidad_pago": {
+      "type": "string",
+      "enum": [
+        "contado",
+        "a_cuenta"
+      ],
+      "description": "Modalidad de pago para ingresos"
+    },
+    "es_gasto_negocio": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si el gasto pertenece al negocio (true) o al hogar (false)"
+    }
+  },
+  "required": [
+    "tipo",
+    "monto",
+    "fecha"
+  ]
+}
