@@ -1,0 +1,28 @@
+{
+  "name": "Producto",
+  "type": "object",
+  "properties": {
+    "nombre": {
+      "type": "string",
+      "description": "Nombre del producto"
+    },
+    "costo_unitario": {
+      "type": "number",
+      "description": "Costo de compra o producci\u00f3n por unidad"
+    },
+    "precio_venta": {
+      "type": "number",
+      "description": "Precio de venta por unidad"
+    },
+    "cantidad_stock": {
+      "type": "number",
+      "description": "Cantidad en inventario"
+    }
+  },
+  "required": [
+    "nombre",
+    "costo_unitario",
+    "precio_venta",
+    "cantidad_stock"
+  ]
+}
