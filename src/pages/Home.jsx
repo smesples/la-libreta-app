@@ -1,125 +1,78 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '../api/base44Client';
-import { Plus, Minus, Package, TrendingUp, TrendingDown, Wallet, LogOut } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import BotonGrande from '../components/BotonGrande';
-import TarjetaResumen from '../components/TarjetaResumen';
-import ModalRegistro from '../components/ModalRegistro';
-import ModalProducto from '../components/ModalProducto';
-import ListaTransacciones from '../components/ListaTransacciones';
-import ListaProductos from '../components/ListaProductos';
-import PuntoEquilibrio from '../components/PuntoEquilibrio';
-import FortalezaPanel from '../components/FortalezaPanel';
-import IndicadorPEQ from '../components/IndicadorPEQ';
-import ReporteSolvencia from '../components/ReporteSolvencia';
+// localDB.js — Reemplaza base44.entities con persistencia en localStorage
+// Ubicación: src/api/localDB.js
 
-export default function Home() {
-  const [modalIngreso, setModalIngreso] = useState(false);
-  const [modalGasto, setModalGasto] = useState(false);
-  const [modalProducto, setModalProducto] = useState(false);
-  const [productoEditar, setProductoEditar] = useState(null);
+const getCollection = (nombre) => {
+  try {
+    return JSON.parse(localStorage.getItem(nombre) || '[]');
+  } catch {
+    return [];
+  }
+};
 
-  const queryClient = useQueryClient();
+const saveCollection = (nombre, datos) => {
+  localStorage.setItem(nombre, JSON.stringify(datos));
+};
 
-  // --- CAPA DE IDENTIDAD ---
-  const currentUserId = localStorage.getItem('usuarioLibreta');
-  const nombreUsuario = localStorage.getItem('nombreUsuarioLibreta');
+const generarId = () => `_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
-  const cerrarSesion = () => {
-    localStorage.removeItem('usuarioLibreta');
-    localStorage.removeItem('nombreUsuarioLibreta');
-    window.location.reload();
-  };
+// Fábrica genérica de entidad con CRUD completo
+const crearEntidad = (nombreColeccion) => ({
 
-  // --- CONSULTAS FILTRADAS POR USUARIO ---
-  const { data: transacciones = [] } = useQuery({
-    queryKey: ['transacciones', currentUserId],
-    queryFn: () => base44.entities.Transaccion.list({
-      where: { usuarioId: currentUserId },
-      order: '-fecha',
-      limit: 100
-    })
-  });
+  list: ({ where = {}, order = '', limit = 1000 } = {}) => {
+    let datos = getCollection(nombreColeccion);
 
-  const { data: productos = [] } = useQuery({
-    queryKey: ['productos', currentUserId],
-    queryFn: () => base44.entities.Producto.list({
-      where: { usuarioId: currentUserId }
-    })
-  });
+    // Filtrar por todas las propiedades de where
+    datos = datos.filter(item =>
+      Object.entries(where).every(([k, v]) => item[k] === v)
+    );
 
-  // --- MUTACIONES CON CIERRE DE MODAL FORZADO ---
-  const crearTransaccion = useMutation({
-    mutationFn: async (data) => {
-      console.log("Enviando estos datos a Base44:", { ...data, usuarioId: currentUserId });
-      return await base44.entities.Transaccion.create({ 
-        ...data, 
-        usuarioId: currentUserId || 'anonimo' // Evita que viaje vacío
+    // Ordenar: prefijo '-' indica descendente
+    if (order) {
+      const desc = order.startsWith('-');
+      const campo = desc ? order.slice(1) : order;
+      datos.sort((a, b) => {
+        if (a[campo] < b[campo]) return desc ? 1 : -1;
+        if (a[campo] > b[campo]) return desc ? -1 : 1;
+        return 0;
       });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transacciones'] });
-      setModalIngreso(false);
-      setModalGasto(false);
-    },
-    onError: (error) => {
-      setModalIngreso(false);
-      setModalGasto(false);
-      alert("Error técnico: " + error.message);
-      console.error("Detalle del error:", error);
     }
-  });
 
-  const crearProducto = useMutation({
-    mutationFn: (data) => base44.entities.Producto.create({ ...data, usuarioId: currentUserId }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['productos'] });
-      setModalProducto(false);
-    },
-    onError: (error) => {
-      alert("Error al crear producto.");
-      console.error(error);
-    }
-  });
+    return Promise.resolve(datos.slice(0, limit));
+  },
 
-  const actualizarProducto = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Producto.update(id, { ...data, usuarioId: currentUserId }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['productos'] });
-      setModalProducto(false);
-      setProductoEditar(null);
-    }
-  });
+  create: (datos) => {
+    const coleccion = getCollection(nombreColeccion);
+    const nuevo = { ...datos, id: generarId(), created_date: new Date().toISOString() };
+    coleccion.push(nuevo);
+    saveCollection(nombreColeccion, coleccion);
+    return Promise.resolve(nuevo);
+  },
 
-  const eliminarProducto = useMutation({
-    mutationFn: (id) => base44.entities.Producto.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['productos'] })
-  });
+  update: (id, datos) => {
+    const coleccion = getCollection(nombreColeccion);
+    const idx = coleccion.findIndex(item => item.id === id);
+    if (idx === -1) return Promise.reject(new Error('Registro no encontrado'));
+    coleccion[idx] = { ...coleccion[idx], ...datos };
+    saveCollection(nombreColeccion, coleccion);
+    return Promise.resolve(coleccion[idx]);
+  },
 
-  // --- LÓGICA DE CÁLCULOS ---
-  const mesActual = new Date().getMonth();
-  const añoActual = new Date().getFullYear();
-  
-  const transaccionesMes = transacciones.filter(t => {
-    const fecha = new Date(t.fecha);
-    return fecha.getMonth() === mesActual && fecha.getFullYear() === añoActual;
-  });
+  delete: (id) => {
+    const coleccion = getCollection(nombreColeccion);
+    saveCollection(nombreColeccion, coleccion.filter(item => item.id !== id));
+    return Promise.resolve({ success: true });
+  },
 
-  const ingresosMes = transaccionesMes.filter(t => t.tipo === 'ingreso').reduce((sum, t) => sum + t.monto, 0);
-  const gastosMes = transaccionesMes.filter(t => t.tipo === 'gasto').reduce((sum, t) => sum + t.monto, 0);
-  const balanceMes = ingresosMes - gastosMes;
+  get: (id) => {
+    const coleccion = getCollection(nombreColeccion);
+    const item = coleccion.find(i => i.id === id);
+    if (!item) return Promise.reject(new Error('No encontrado'));
+    return Promise.resolve(item);
+  },
+});
 
-  const costosFijos = transaccionesMes
-    .filter(t => t.tipo === 'gasto' && t.es_costo_fijo && t.es_gasto_negocio !== false)
-    .reduce((sum, t) => sum + t.monto, 0);
-
-  const comprasStock = transacciones
-    .filter(t => t.tipo === 'gasto' && ['mercaderia', 'materia_prima'].includes(t.categoria))
-    .reduce((sum, t) => sum + t.monto, 0);
-
-  const ventasTotales = transacciones.filter(t => t.tipo === 'ingreso' && t.categoria === 'venta').reduce((sum, t) => sum + t.monto, 0);
-  const ventasPendientes = transacciones.filter(t => t.tipo === 'ingreso' && t.modalidad_pago === 'a_cuenta').reduce((sum, t) => sum + t.monto, 0);
-
-  const efectivoCaja = Math.max(0, transacciones
-    .filter(t => t.tipo === 'ingreso' && t.modal
+// Entidades de La Libreta
+export const db = {
+  Transaccion: crearEntidad('transacciones'),
+  Producto: crearEntidad('productos'),
+};
