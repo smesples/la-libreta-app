@@ -1,9 +1,11 @@
-import { createClient } from '@base44/sdk';
+// base44Client.js - Versión MVP sin dependencia de backend Base44
+// El sistema de auth ahora vive en App.jsx con localStorage
 
-// Ponemos los datos directamente para evitar el error de "null"
-export const base44 = createClient({
-  appId: 'TU_APP_ID_AQUI',       // Copiá el ID de tu app desde Base44
-  token: 'TU_TOKEN_AQUI',       // Copiá el Token/API Key desde Base44
-  serverUrl: 'https://api.base44.com', // Aseguramos la URL base
-  requiresAuth: false
-});
+export const base44 = {
+  // Stub vacío para evitar errores en imports que todavía referencien base44
+  auth: {
+    me: () => Promise.reject(new Error('Auth manejado localmente')),
+    logout: () => {},
+    redirectToLogin: () => {},
+  },
+};
