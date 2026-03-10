@@ -139,6 +139,7 @@ export default function Home() {
     } else {
       await crearProducto.mutateAsync(data);
     }
+    setProductoEditar(null); // <--- LIMPIA EL ESTADO
   };
 
   return (
