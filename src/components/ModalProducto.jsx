@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+jsximport React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,20 +28,26 @@ export default function ModalProducto({ open, onClose, onGuardar, producto }) {
 
   const handleGuardar = async () => {
     if (!nombre || !costoUnitario || !precioVenta || !cantidadStock) return;
-    
+
     setGuardando(true);
-    await onGuardar({
-      nombre,
-      costo_unitario: parseFloat(costoUnitario),
-      precio_venta: parseFloat(precioVenta),
-      cantidad_stock: parseFloat(cantidadStock)
-    }, producto?.id);
-    
-    setGuardando(false);
-    onClose();
+    try {
+      await onGuardar({
+        nombre,
+        costo_unitario: parseFloat(costoUnitario),
+        precio_venta: parseFloat(precioVenta),
+        cantidad_stock: parseFloat(cantidadStock)
+      }, producto?.id);
+      onClose();
+    } catch (error) {
+      console.error("Error al guardar producto:", error);
+      alert("Hubo un error al guardar el producto. Reintente.");
+    } finally {
+      // ✅ FIX: siempre libera el loading
+      setGuardando(false);
+    }
   };
 
-  const margen = costoUnitario && precioVenta 
+  const margen = costoUnitario && precioVenta
     ? ((parseFloat(precioVenta) - parseFloat(costoUnitario)) / parseFloat(precioVenta) * 100).toFixed(1)
     : 0;
 
