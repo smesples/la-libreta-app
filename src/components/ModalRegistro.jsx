@@ -33,4 +33,3 @@ export default function ModalRegistro({ open, onClose, tipo, onGuardar }) {
       setLoading(false); // Solo liberamos si falla
     }
   };
-
