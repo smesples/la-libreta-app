@@ -1,65 +1,47 @@
+// Login.jsx - Versión corregida que usa AuthContext
 import React from 'react';
+import { useAuth } from '@/lib/AuthContext';
 
-const Login = () => {
-  // Lista de los 5 usuarios para la prueba piloto
-  const usuarios = [
-    { id: 'prod_01', nombre: 'Productor A' },
-    { id: 'prod_02', nombre: 'Productor B' },
-    { id: 'prod_03', nombre: 'Productor C' },
-    { id: 'prod_04', nombre: 'Productor D' },
-    { id: 'prod_05', nombre: 'Productor E' }
-  ];
+const PERFILES = [
+  { id: 'PROD_01', nombre: 'Productor A' },
+  { id: 'PROD_02', nombre: 'Productor B' },
+  { id: 'PROD_03', nombre: 'Productor C' },
+  { id: 'PROD_04', nombre: 'Productor D' },
+  { id: 'PROD_05', nombre: 'Productor E' },
+];
 
-  const seleccionarUsuario = (usuario) => {
-    // Guardamos la identidad en el navegador
-    localStorage.setItem('usuarioLibreta', usuario.id);
-    localStorage.setItem('nombreUsuarioLibreta', usuario.nombre);
-    
-    // Forzamos la recarga para que el sistema reconozca al nuevo usuario
-    window.location.href = '/';
-  };
+export default function Login() {
+  const { loginConPerfil } = useAuth();
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-slate-100 p-8">
-        <div className="text-center mb-10">
-          <div className="bg-blue-600 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-xl">L</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800">La Libreta</h1>
-          <p className="text-slate-500 mt-2">Prueba Piloto de Solvencia</p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+      {/* Header */}
+      <div className="flex flex-col items-center mb-8">
+        <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mb-4">
+          <span className="text-white text-2xl font-bold">L</span>
         </div>
-        
-        <label className="block text-sm font-medium text-slate-700 mb-4">
+        <h1 className="text-2xl font-bold text-gray-900">La Libreta</h1>
+        <p className="text-gray-500 mt-1">Prueba Piloto de Solvencia</p>
+      </div>
+
+      {/* Selector de perfil */}
+      <div className="w-full max-w-sm">
+        <p className="text-gray-700 font-medium mb-4 text-center">
           Seleccione su perfil de productor:
-        </label>
-        
-        <div className="space-y-3">
-          {usuarios.map((u) => (
+        </p>
+        <div className="flex flex-col gap-3">
+          {PERFILES.map((perfil) => (
             <button
-              key={u.id}
-              onClick={() => seleccionarUsuario(u)}
-              className="w-full p-4 text-left border border-slate-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 hover:shadow-md transition-all flex justify-between items-center group"
+              key={perfil.id}
+              onClick={() => loginConPerfil(perfil.id)}
+              className="w-full bg-white border border-gray-200 rounded-xl px-5 py-4 text-left hover:border-blue-400 hover:shadow-sm transition-all"
             >
-              <div>
-                <span className="font-semibold text-slate-700 block">{u.nombre}</span>
-                <span className="text-xs text-slate-400 uppercase tracking-wider">ID: {u.id}</span>
-              </div>
-              <span className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-bold">
-                Entrar →
-              </span>
+              <p className="font-semibold text-gray-900">{perfil.nombre}</p>
+              <p className="text-sm text-gray-400">ID: {perfil.id}</p>
             </button>
           ))}
-        </div>
-        
-        <div className="mt-10 pt-6 border-t border-slate-100">
-          <p className="text-[10px] text-center text-slate-400 uppercase tracking-widest leading-relaxed">
-            Propiedad del Consorcio Tecnológico <br/> Datos Protegidos por ID de Usuario
-          </p>
         </div>
       </div>
     </div>
   );
-};
-
-export default Login;
+}
