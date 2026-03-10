@@ -50,14 +50,21 @@ export default function Home() {
   });
 
   // --- MUTACIONES CON ETIQUETA DE USUARIO ---
-  const crearTransaccion = useMutation({
+ const crearTransaccion = useMutation({
     mutationFn: (data) => base44.entities.Transaccion.create({ ...data, usuarioId: currentUserId }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['transacciones'] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['transacciones'] });
+      setModalIngreso(false); // <--- CIERRA EL MODAL AL TERMINAR
+      setModalGasto(false);   // <--- CIERRA EL MODAL AL TERMINAR
+    }
   });
 
   const crearProducto = useMutation({
     mutationFn: (data) => base44.entities.Producto.create({ ...data, usuarioId: currentUserId }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['productos'] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['productos'] });
+      setModalProducto(false); // <--- CIERRA EL MODAL AL TERMINAR
+    }
   });
 
   const actualizarProducto = useMutation({
