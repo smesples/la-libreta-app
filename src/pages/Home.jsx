@@ -51,15 +51,23 @@ export default function Home() {
 
   // --- MUTACIONES CON CIERRE DE MODAL FORZADO ---
   const crearTransaccion = useMutation({
-    mutationFn: (data) => base44.entities.Transaccion.create({ ...data, usuarioId: currentUserId }),
+    mutationFn: async (data) => {
+      console.log("Enviando estos datos a Base44:", { ...data, usuarioId: currentUserId });
+      return await base44.entities.Transaccion.create({ 
+        ...data, 
+        usuarioId: currentUserId || 'anonimo' // Evita que viaje vacío
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transacciones'] });
       setModalIngreso(false);
       setModalGasto(false);
     },
     onError: (error) => {
-      alert("Error al guardar transacción. Verifique que todos los campos obligatorios estén completos.");
-      console.error(error);
+      setModalIngreso(false);
+      setModalGasto(false);
+      alert("Error técnico: " + error.message);
+      console.error("Detalle del error:", error);
     }
   });
 
