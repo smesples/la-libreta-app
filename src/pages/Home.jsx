@@ -130,7 +130,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-200 px-4 py-3 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+      <div className="bg-white border-b border-slate-200 px-4 py-3 flex justify-between items-center sticky top-0 z-20 shadow-sm">
         <div>
           <h1 className="font-bold text-slate-800 text-lg">La Libreta</h1>
           <p className="text-xs text-slate-400">{nombreUsuario}</p>
@@ -144,7 +144,37 @@ export default function Home() {
         </button>
       </div>
 
-      <div className="max-w-2xl mx-auto p-4 pb-32 space-y-4">
+      {/* ── ZONA 1: BOTONES DE ACCIÓN — sticky bajo el header ── */}
+      <div className="sticky top-[57px] z-10 bg-white border-b border-slate-200 px-4 py-3 flex gap-3 shadow-sm">
+        <BotonGrande
+          variant="primary"
+          onClick={() => setModalIngreso(true)}
+          className="flex-1"
+        >
+          + Ingreso
+        </BotonGrande>
+        <BotonGrande
+          variant="danger"
+          onClick={() => setModalGasto(true)}
+          className="flex-1"
+        >
+          − Gasto
+        </BotonGrande>
+      </div>
+
+      <div className="max-w-2xl mx-auto p-4 pb-10 space-y-4">
+
+        {/* ── ZONA 2: KPIs OPERATIVOS ── */}
+        <div className="grid grid-cols-3 gap-3">
+          <TarjetaResumen titulo="Ingresos" valor={ventasMes} color="emerald" />
+          <TarjetaResumen titulo="Gastos" valor={gastosMes} color="red" />
+          <TarjetaResumen titulo="Balance" valor={balanceMes} color={balanceMes >= 0 ? "blue" : "red"} />
+        </div>
+
+        {/* ── ZONA 3: PUNTO DE EQUILIBRIO ── */}
+        <IndicadorPEQ gastosMes={gastosMes} ventasMes={ventasMes} />
+
+        {/* ── ZONA 4: MI FORTALEZA (resumen + acceso al Reporte) ── */}
         <FortalezaPanel
           comprasStock={comprasStock}
           ventasTotales={ventasTotales}
@@ -153,14 +183,7 @@ export default function Home() {
           peqAlcanzadoTemprano={peqAlcanzadoTemprano}
         />
 
-        <div className="grid grid-cols-3 gap-3">
-          <TarjetaResumen titulo="Ingresos" valor={ventasMes} color="emerald" />
-          <TarjetaResumen titulo="Gastos" valor={gastosMes} color="red" />
-          <TarjetaResumen titulo="Balance" valor={balanceMes} color={balanceMes >= 0 ? "blue" : "red"} />
-        </div>
-
-        <IndicadorPEQ gastosMes={gastosMes} ventasMes={ventasMes} />
-
+        {/* ── TABS: MOVIMIENTOS / PRODUCTOS / REPORTE ── */}
         <Tabs defaultValue="movimientos">
           <TabsList className="w-full">
             <TabsTrigger value="movimientos" className="flex-1">Movimientos</TabsTrigger>
@@ -184,23 +207,6 @@ export default function Home() {
             <ReporteSolvencia transacciones={transacciones} />
           </TabsContent>
         </Tabs>
-      </div>
-
-      <div className="fixed bottom-6 left-0 right-0 flex justify-center gap-4 px-6 z-20">
-        <BotonGrande
-          variant="primary"
-          onClick={() => setModalIngreso(true)}
-          className="flex-1 max-w-40"
-        >
-          + Ingreso
-        </BotonGrande>
-        <BotonGrande
-          variant="danger"
-          onClick={() => setModalGasto(true)}
-          className="flex-1 max-w-40"
-        >
-          − Gasto
-        </BotonGrande>
       </div>
 
       <ModalRegistro
