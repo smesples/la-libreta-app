@@ -195,5 +195,13 @@ export default function Home() {
         onGuardar={(datos) => crearTransaccion.mutateAsync(datos)}
       />
     </div>
+     </div> {/* cierre del max-w-2xl */}
+
+      {/* ── PIE DE PÁGINA ── */}
+      <div className="text-center py-4 text-xs text-slate-400">
+        Powered by <span className="font-semibold text-slate-500">Somos Pioneros</span>
+      </div>
+
+    </div> {/* cierre del min-h-screen */}
   );
 }
