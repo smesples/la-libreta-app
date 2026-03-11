@@ -20,7 +20,7 @@ export default function Home() {
   const queryClient = useQueryClient();
   const { user, logout } = useAuth();
 
-  const currentUserId = user?.id || 'anonimo';
+  const currentUserId = user?.id ?? user?.sub ?? null;
   const nombreUsuario = user?.nombre || 'Productor';
 
   const { data: transacciones = [] } = useQuery({
@@ -33,7 +33,7 @@ export default function Home() {
   });
 
   const crearTransaccion = useMutation({
-    mutationFn: (data) => db.Transaccion.create({ ...data, usuario_id: currentUserId }),
+    mutationFn: (data) => db.Transaccion.create({ ...data, usuario_id: user?.id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transacciones'] });
       setModalIngreso(false);
