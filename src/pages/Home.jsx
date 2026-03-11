@@ -26,14 +26,14 @@ export default function Home() {
   const { data: transacciones = [] } = useQuery({
     queryKey: ['transacciones', currentUserId],
     queryFn: () => db.Transaccion.list({
-      where: { usuarioId: currentUserId },
+      where: { usuario_id: currentUserId },
       order: '-fecha',
       limit: 100
     })
   });
 
   const crearTransaccion = useMutation({
-    mutationFn: (data) => db.Transaccion.create({ ...data, usuarioId: currentUserId }),
+    mutationFn: (data) => db.Transaccion.create({ ...data, usuario_id: currentUserId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transacciones'] });
       setModalIngreso(false);
