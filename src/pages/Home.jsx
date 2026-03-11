@@ -194,6 +194,10 @@ export default function Home() {
         tipo="gasto"
         onGuardar={(datos) => crearTransaccion.mutateAsync(datos)}
       />
+         {/* ── PIE DE PÁGINA ── */}
+      <div className="text-center py-6 text-xs text-slate-400">
+        Powered by <span className="font-semibold text-slate-500">Somos Pioneros</span>
+      </div>
     </div>
   );
 }
