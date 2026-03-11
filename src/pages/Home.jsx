@@ -1,16 +1,14 @@
-// Home.jsx — Versión corregida con persistencia local
+// Home.jsx — Nueva jerarquía UX: acción > KPIs > PEQ > Fortaleza compacta > Movimientos / Reporte
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { db } from '../api/localDB';
 import { useAuth } from '@/lib/AuthContext';
-import { LogOut } from 'lucide-react';
+import { LogOut, ShieldCheck } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BotonGrande from '../components/BotonGrande';
 import TarjetaResumen from '../components/TarjetaResumen';
 import ModalRegistro from '../components/ModalRegistro';
-import ModalProducto from '../components/ModalProducto';
 import ListaTransacciones from '../components/ListaTransacciones';
-import ListaProductos from '../components/ListaProductos';
 import FortalezaPanel from '../components/FortalezaPanel';
 import IndicadorPEQ from '../components/IndicadorPEQ';
 import ReporteSolvencia from '../components/ReporteSolvencia';
@@ -18,8 +16,6 @@ import ReporteSolvencia from '../components/ReporteSolvencia';
 export default function Home() {
   const [modalIngreso, setModalIngreso] = useState(false);
   const [modalGasto, setModalGasto] = useState(false);
-  const [modalProducto, setModalProducto] = useState(false);
-  const [productoEditar, setProductoEditar] = useState(null);
 
   const queryClient = useQueryClient();
   const { user, logout } = useAuth();
@@ -36,11 +32,6 @@ export default function Home() {
     })
   });
 
-  const { data: productos = [] } = useQuery({
-    queryKey: ['productos', currentUserId],
-    queryFn: () => db.Producto.list({ where: { usuarioId: currentUserId } })
-  });
-
   const crearTransaccion = useMutation({
     mutationFn: (data) => db.Transaccion.create({ ...data, usuarioId: currentUserId }),
     onSuccess: () => {
@@ -53,29 +44,6 @@ export default function Home() {
       setModalGasto(false);
       alert("Error al guardar: " + error.message);
     }
-  });
-
-  const crearProducto = useMutation({
-    mutationFn: (data) => db.Producto.create({ ...data, usuarioId: currentUserId }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['productos'] });
-      setModalProducto(false);
-    },
-    onError: (error) => alert("Error al crear producto: " + error.message)
-  });
-
-  const actualizarProducto = useMutation({
-    mutationFn: ({ id, data }) => db.Producto.update(id, { ...data, usuarioId: currentUserId }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['productos'] });
-      setModalProducto(false);
-      setProductoEditar(null);
-    }
-  });
-
-  const eliminarProducto = useMutation({
-    mutationFn: (id) => db.Producto.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['productos'] })
   });
 
   const mesActual = new Date().getMonth();
@@ -117,19 +85,15 @@ export default function Home() {
   const diaHoy = new Date().getDate();
   const peqAlcanzadoTemprano = diaHoy <= 20 && ventasMes >= gastosMes && gastosMes > 0;
 
-  const margenPromedio = productos.length > 0
-    ? productos.reduce((sum, p) => {
-        const m = p.precio_venta > 0 ? ((p.precio_venta - p.costo_unitario) / p.precio_venta) * 100 : 0;
-        return sum + m;
-      }, 0) / productos.length
-    : 0;
-
-  const costosFijos = transaccionesMes
-    .filter(t => t.tipo === 'gasto' && t.es_costo_fijo)
-    .reduce((sum, t) => sum + t.monto, 0);
+  // Fortaleza total para el widget compacto del Home
+  const S = comprasStock - ventasTotales;
+  const stockAbs = Math.abs(S);
+  const fortalezaTotal = stockAbs + efectivoCaja + ventasPendientes;
 
   return (
     <div className="min-h-screen bg-slate-50">
+
+      {/* ── HEADER ── */}
       <div className="bg-white border-b border-slate-200 px-4 py-3 flex justify-between items-center sticky top-0 z-20 shadow-sm">
         <div>
           <h1 className="font-bold text-slate-800 text-lg">La Libreta</h1>
@@ -164,7 +128,7 @@ export default function Home() {
 
       <div className="max-w-2xl mx-auto p-4 pb-10 space-y-4">
 
-        {/* ── ZONA 2: KPIs OPERATIVOS ── */}
+        {/* ── ZONA 2: KPIs OPERATIVOS DEL MES ── */}
         <div className="grid grid-cols-3 gap-3">
           <TarjetaResumen titulo="Ingresos" valor={ventasMes} color="emerald" />
           <TarjetaResumen titulo="Gastos" valor={gastosMes} color="red" />
@@ -174,36 +138,45 @@ export default function Home() {
         {/* ── ZONA 3: PUNTO DE EQUILIBRIO ── */}
         <IndicadorPEQ gastosMes={gastosMes} ventasMes={ventasMes} />
 
-        {/* ── ZONA 4: MI FORTALEZA (resumen + acceso al Reporte) ── */}
-        <FortalezaPanel
-          comprasStock={comprasStock}
-          ventasTotales={ventasTotales}
-          ventasPendientes={ventasPendientes}
-          efectivoCaja={efectivoCaja}
-          peqAlcanzadoTemprano={peqAlcanzadoTemprano}
-        />
+        {/* ── ZONA 4: FORTALEZA COMPACTA — solo el número + acceso al Reporte ── */}
+        <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-2xl px-5 py-4 flex items-center justify-between shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center">
+              <ShieldCheck className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-slate-400 text-xs font-medium uppercase tracking-widest">Mi Fortaleza</p>
+              <p className="text-white text-2xl font-bold">${fortalezaTotal.toLocaleString()}</p>
+            </div>
+          </div>
+          {peqAlcanzadoTemprano && (
+            <span className="text-xs font-semibold bg-yellow-50 border border-yellow-300 text-yellow-700 px-3 py-1.5 rounded-full">
+              🚀 En crecimiento
+            </span>
+          )}
+        </div>
 
-        {/* ── TABS: MOVIMIENTOS / PRODUCTOS / REPORTE ── */}
+        {/* ── TABS: MOVIMIENTOS / REPORTE ── */}
         <Tabs defaultValue="movimientos">
           <TabsList className="w-full">
             <TabsTrigger value="movimientos" className="flex-1">Movimientos</TabsTrigger>
-            <TabsTrigger value="productos" className="flex-1">Productos</TabsTrigger>
             <TabsTrigger value="reporte" className="flex-1">Reporte</TabsTrigger>
           </TabsList>
 
+          {/* Movimientos: lista de transacciones del usuario */}
           <TabsContent value="movimientos" className="mt-3">
             <ListaTransacciones transacciones={transacciones} />
           </TabsContent>
 
-          <TabsContent value="productos" className="mt-3">
-            <ListaProductos
-              productos={productos}
-              onEditar={(p) => { setProductoEditar(p); setModalProducto(true); }}
-              onEliminar={(id) => eliminarProducto.mutate(id)}
+          {/* Reporte: Fortaleza completa + historial de solvencia mensual */}
+          <TabsContent value="reporte" className="mt-3 space-y-4">
+            <FortalezaPanel
+              comprasStock={comprasStock}
+              ventasTotales={ventasTotales}
+              ventasPendientes={ventasPendientes}
+              efectivoCaja={efectivoCaja}
+              peqAlcanzadoTemprano={peqAlcanzadoTemprano}
             />
-          </TabsContent>
-
-          <TabsContent value="reporte" className="mt-3">
             <ReporteSolvencia transacciones={transacciones} />
           </TabsContent>
         </Tabs>
@@ -220,15 +193,6 @@ export default function Home() {
         onClose={() => setModalGasto(false)}
         tipo="gasto"
         onGuardar={(datos) => crearTransaccion.mutateAsync(datos)}
-      />
-      <ModalProducto
-        open={modalProducto}
-        onClose={() => { setModalProducto(false); setProductoEditar(null); }}
-        producto={productoEditar}
-        onGuardar={(datos) => productoEditar
-          ? actualizarProducto.mutateAsync({ id: productoEditar.id, data: datos })
-          : crearProducto.mutateAsync(datos)
-        }
       />
     </div>
   );
