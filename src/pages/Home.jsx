@@ -227,6 +227,7 @@ export default function Home() {
               ventasPendientes={ventasPendientes}
               efectivoCaja={efectivoCaja}
               peqAlcanzadoTemprano={peqAlcanzadoTemprano}
+              ingresosServicio={ingresosServicio}
             />
             <ReporteSolvencia transacciones={transacciones} />
           </TabsContent>
