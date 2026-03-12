@@ -10,60 +10,53 @@ function clasificar(valor, promedio) {
   return 'normal';
 }
 
-function getDiagnosticoProductos(stockAbs, ventasPendientes, efectivoCaja) {
-  const promedio = (stockAbs + ventasPendientes + efectivoCaja) / 3;
-  const stock = clasificar(stockAbs, promedio);
+function getDiagnosticoServicios(ventasPendientes, efectivoCaja) {
+  const promedio = (ventasPendientes + efectivoCaja) / 2;
   const calle = clasificar(ventasPendientes, promedio);
   const caja = clasificar(efectivoCaja, promedio);
 
   // 🟢 VERDE
-  if (stock === 'alto' && calle === 'alto' && caja === 'alto') return {
-    label: 'Crecimiento Acelerado',
-    mensaje: 'Tu negocio está creciendo en todos los frentes.',
+  if (caja === 'alto' && calle === 'alto') return {
+    label: 'Servicio en Expansión',
+    mensaje: 'Cobrás bien y tenés caja para crecer.',
     semaforo: 'verde',
   };
-  if (stock === 'bajo' && calle === 'alto' && caja === 'alto') return {
-    label: 'Ciclo Exitoso',
-    mensaje: 'Vendiste bien y cobrás bien.',
+  if (caja === 'alto' && calle !== 'alto') return {
+    label: 'Liquidez Sólida',
+    mensaje: 'Tenés caja disponible y poca deuda pendiente.',
     semaforo: 'verde',
   };
 
   // 🔴 ROJO
-  if (stock === 'bajo' && calle === 'bajo' && caja === 'bajo') return {
-    label: 'Negocio Inactivo',
-    mensaje: 'No hay movimiento en ninguna variable.',
-    semaforo: 'rojo',
-  };
-  if (stock === 'alto' && calle === 'bajo' && caja === 'bajo') return {
-    label: 'Capital Inmovilizado',
-    mensaje: 'Tu capital está atrapado en stock sin caja ni cobros.',
-    semaforo: 'rojo',
-  };
-  if (calle === 'alto' && caja === 'bajo') return {
+  if (caja === 'bajo' && calle === 'alto') return {
     label: 'Cobranza Crítica',
-    mensaje: 'Vendiste pero no estás cobrando.',
+    mensaje: 'Trabajaste pero no estás cobrando.',
+    semaforo: 'rojo',
+  };
+  if (caja === 'bajo' && calle === 'normal') return {
+    label: 'Liquidez Ajustada',
+    mensaje: 'Tu caja necesita refuerzo urgente.',
+    semaforo: 'rojo',
+  };
+  if (caja === 'bajo' && calle === 'bajo') return {
+    label: 'Servicio Inactivo',
+    mensaje: 'No hay movimiento en ninguna variable.',
     semaforo: 'rojo',
   };
 
   // 🟡 AMARILLO
-  if (stock === 'alto' && caja !== 'bajo') return {
-    label: 'Exceso de Stock',
-    mensaje: 'Tenés más mercadería de la que estás vendiendo.',
-    semaforo: 'amarillo',
-  };
-  if (caja === 'alto' && stock === 'bajo' && calle === 'bajo') return {
-    label: 'Liquidez Sin Actividad',
-    mensaje: 'Tenés caja disponible pero poco movimiento comercial.',
+  if (calle === 'alto') return {
+    label: 'Cobranza Pendiente',
+    mensaje: 'Trabajaste bien, pero el dinero todavía está en la calle.',
     semaforo: 'amarillo',
   };
 
   return {
-    label: 'Operación Equilibrada',
-    mensaje: 'Tu negocio está estable.',
+    label: 'Actividad Moderada',
+    mensaje: 'Hay movimiento pero podés mejorar el volumen.',
     semaforo: 'amarillo',
   };
 }
-
 function getDiagnosticoServicios(ventasPendientes, efectivoCaja) {
   const promedio = (ventasPendientes + efectivoCaja) / 2;
   const calle = clasificar(ventasPendientes, promedio);
