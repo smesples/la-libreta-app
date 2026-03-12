@@ -162,12 +162,7 @@ export default function FortalezaPanel({ comprasStock, ventasTotales, ventasPend
           <p className={`text-xs mt-0.5 ${estilo.color} opacity-80`}>{diagnostico.mensaje}</p>
         </div>
 
-        {peqAlcanzadoTemprano && (
-          <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold bg-yellow-50 border-yellow-300 text-yellow-700">
-            <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" />
-            🚀 En Crecimiento Acelerado
-          </div>
-        )}
+        
       </div>
 
       <div className="bg-slate-50 divide-y divide-slate-100">
