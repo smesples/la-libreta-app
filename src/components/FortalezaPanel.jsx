@@ -10,12 +10,66 @@ function clasificar(valor, promedio) {
   return 'normal';
 }
 
+function getDiagnosticoProductos(stockAbs, ventasPendientes, efectivoCaja) {
+  const promedio = (stockAbs + ventasPendientes + efectivoCaja) / 3;
+  const stock = clasificar(stockAbs, promedio);
+  const calle = clasificar(ventasPendientes, promedio);
+  const caja = clasificar(efectivoCaja, promedio);
+
+  // VERDE
+  if (stock === 'alto' && calle === 'alto' && caja === 'alto') return {
+    label: 'Crecimiento Acelerado',
+    mensaje: 'Tu negocio está creciendo en todos los frentes.',
+    semaforo: 'verde',
+  };
+  if (stock === 'bajo' && calle === 'alto' && caja === 'alto') return {
+    label: 'Ciclo Exitoso',
+    mensaje: 'Vendiste bien y cobrás bien.',
+    semaforo: 'verde',
+  };
+
+  // ROJO
+  if (stock === 'bajo' && calle === 'bajo' && caja === 'bajo') return {
+    label: 'Negocio Inactivo',
+    mensaje: 'No hay movimiento en ninguna variable.',
+    semaforo: 'rojo',
+  };
+  if (stock === 'alto' && calle === 'bajo' && caja === 'bajo') return {
+    label: 'Capital Inmovilizado',
+    mensaje: 'Tu capital está atrapado en stock sin caja ni cobros.',
+    semaforo: 'rojo',
+  };
+  if (calle === 'alto' && caja === 'bajo') return {
+    label: 'Cobranza Crítica',
+    mensaje: 'Vendiste pero no estás cobrando.',
+    semaforo: 'rojo',
+  };
+
+  // AMARILLO
+  if (stock === 'alto' && caja !== 'bajo') return {
+    label: 'Exceso de Stock',
+    mensaje: 'Tenés más mercadería de la que estás vendiendo.',
+    semaforo: 'amarillo',
+  };
+  if (caja === 'alto' && stock === 'bajo' && calle === 'bajo') return {
+    label: 'Liquidez Sin Actividad',
+    mensaje: 'Tenés caja disponible pero poco movimiento comercial.',
+    semaforo: 'amarillo',
+  };
+
+  return {
+    label: 'Operación Equilibrada',
+    mensaje: 'Tu negocio está estable.',
+    semaforo: 'amarillo',
+  };
+}
+
 function getDiagnosticoServicios(ventasPendientes, efectivoCaja) {
   const promedio = (ventasPendientes + efectivoCaja) / 2;
   const calle = clasificar(ventasPendientes, promedio);
   const caja = clasificar(efectivoCaja, promedio);
 
-  // 🟢 VERDE
+  // VERDE
   if (caja === 'alto' && calle === 'alto') return {
     label: 'Servicio en Expansión',
     mensaje: 'Cobrás bien y tenés caja para crecer.',
@@ -27,7 +81,7 @@ function getDiagnosticoServicios(ventasPendientes, efectivoCaja) {
     semaforo: 'verde',
   };
 
-  // 🔴 ROJO
+  // ROJO
   if (caja === 'bajo' && calle === 'alto') return {
     label: 'Cobranza Crítica',
     mensaje: 'Trabajaste pero no estás cobrando.',
@@ -44,7 +98,7 @@ function getDiagnosticoServicios(ventasPendientes, efectivoCaja) {
     semaforo: 'rojo',
   };
 
-  // 🟡 AMARILLO
+  // AMARILLO
   if (calle === 'alto') return {
     label: 'Cobranza Pendiente',
     mensaje: 'Trabajaste bien, pero el dinero todavía está en la calle.',
@@ -54,58 +108,6 @@ function getDiagnosticoServicios(ventasPendientes, efectivoCaja) {
   return {
     label: 'Actividad Moderada',
     mensaje: 'Hay movimiento pero podés mejorar el volumen.',
-    semaforo: 'amarillo',
-  };
-}
-function getDiagnosticoServicios(ventasPendientes, efectivoCaja) {
-  const promedio = (ventasPendientes + efectivoCaja) / 2;
-  const calle = clasificar(ventasPendientes, promedio);
-  const caja = clasificar(efectivoCaja, promedio);
-
-  // 🟢 VERDE
-  if (caja === 'alto' && calle === 'alto') return {
-    label: 'Servicio en Expansión',
-    mensaje: 'Cobrás bien y tenés caja para crecer.',
-    semaforo: 'verde',
-  };
-  if (caja === 'alto' && calle === 'bajo') return {
-    label: 'Liquidez Sólida',
-    mensaje: 'Tenés caja disponible y poca deuda pendiente.',
-    semaforo: 'verde',
-  };
-
-  // 🔴 ROJO
-  if (caja === 'bajo' && calle === 'alto') return {
-    label: 'Cobranza Crítica',
-    mensaje: 'Trabajaste pero no estás cobrando.',
-    semaforo: 'rojo',
-  };
-  if (caja === 'bajo' && calle === 'normal') return {
-    label: 'Liquidez Ajustada',
-    mensaje: 'Tu caja necesita refuerzo urgente.',
-    semaforo: 'rojo',
-  };
-  if (caja === 'bajo' && calle === 'bajo') return {
-    label: 'Servicio Inactivo',
-    mensaje: 'No hay movimiento en ninguna variable.',
-    semaforo: 'rojo',
-  };
-
-  // 🟡 AMARILLO
-  if (calle === 'alto') return {
-    label: 'Cobranza Pendiente',
-    mensaje: 'Trabajaste bien, pero el dinero todavía está en la calle.',
-    semaforo: 'amarillo',
-  };
-  if (caja === 'normal' && calle === 'bajo') return {
-    label: 'Actividad Moderada',
-    mensaje: 'Hay movimiento pero podés mejorar el volumen.',
-    semaforo: 'amarillo',
-  };
-
-  return {
-    label: 'Operación Equilibrada',
-    mensaje: 'Tu negocio está estable.',
     semaforo: 'amarillo',
   };
 }
@@ -141,7 +143,6 @@ export default function FortalezaPanel({ comprasStock, ventasTotales, ventasPend
 
   return (
     <div className="rounded-2xl overflow-hidden shadow-xl border border-slate-200">
-      {/* Header Total */}
       <div className="bg-gradient-to-r from-slate-800 to-slate-700 px-6 pt-6 pb-5">
         <div className="flex items-center gap-3 mb-1">
           <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
@@ -153,7 +154,6 @@ export default function FortalezaPanel({ comprasStock, ventasTotales, ventasPend
           </div>
         </div>
 
-        {/* Badge diagnóstico con semáforo */}
         <div className={`mt-3 inline-flex flex-col px-3 py-2 rounded-2xl border ${estilo.bg}`}>
           <div className="flex items-center gap-2">
             <span className="text-base">{estilo.emoji}</span>
@@ -170,10 +170,8 @@ export default function FortalezaPanel({ comprasStock, ventasTotales, ventasPend
         )}
       </div>
 
-      {/* Indicadores */}
       <div className="bg-slate-50 divide-y divide-slate-100">
 
-        {/* Stock / Capital — solo si tiene productos */}
         {tieneProductos && (
           <div className="flex items-center justify-between px-5 py-4">
             <div className="flex items-center gap-3">
@@ -193,7 +191,6 @@ export default function FortalezaPanel({ comprasStock, ventasTotales, ventasPend
           </div>
         )}
 
-        {/* La Calle */}
         <div className="flex items-center justify-between px-5 py-4">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center">
@@ -207,7 +204,6 @@ export default function FortalezaPanel({ comprasStock, ventasTotales, ventasPend
           <span className="font-bold text-lg text-slate-800">${ventasPendientes.toLocaleString()}</span>
         </div>
 
-        {/* Caja */}
         <div className="flex items-center justify-between px-5 py-4">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
