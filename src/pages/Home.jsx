@@ -197,11 +197,7 @@ export default function Home() {
               <p className="text-white text-2xl font-bold">${fortalezaTotal.toLocaleString()}</p>
             </div>
           </div>
-          {peqAlcanzadoTemprano && (
-            <span className="text-xs font-semibold bg-yellow-50 border border-yellow-300 text-yellow-700 px-3 py-1.5 rounded-full">
-              🚀 En crecimiento
-            </span>
-          )}
+          
         </div>
 
         {/* ── TABS: MOVIMIENTOS / REPORTE ── */}
