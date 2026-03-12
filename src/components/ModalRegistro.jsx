@@ -84,7 +84,7 @@ export default function ModalRegistro({ open, onClose, tipo, onGuardar }) {
             >
               {esIngreso ? (
                 <>
-                  <option value="venta">Venta</option>
+                  <option value="venta">Producto</option>
                   <option value="servicio">Servicio</option>
                   <option value="otro_ingreso">Otro ingreso</option>
                 </>
