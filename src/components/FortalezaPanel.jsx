@@ -1,31 +1,98 @@
 import React from 'react';
 import { ShieldCheck, TrendingUp, Banknote, PackageSearch } from 'lucide-react';
 
-function getRotacionInfo(stockAbs, cajaYCalle) {
-  // Capital Inmovilizado: stock muy alto, caja muy baja
-  if (stockAbs > cajaYCalle && cajaYCalle < stockAbs * 0.5) {
-    return { label: 'Capital Inmovilizado', sub: 'Baja rotación', color: 'text-orange-500', bg: 'bg-orange-50 border-orange-200' };
-  }
-  // Operación Fluida: caja alta, stock bajo
-  if (cajaYCalle > stockAbs && stockAbs < cajaYCalle * 0.5) {
-    return { label: 'Operación Fluida', sub: 'Alta rotación', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200' };
-  }
-  // Alta Eficiencia: ambos parejos (ninguno es menos de la mitad del otro)
-  if (stockAbs >= cajaYCalle * 0.5 && cajaYCalle >= stockAbs * 0.5) {
-    return { label: 'Alta Eficiencia y Margen', sub: 'Negocio de alto valor agregado', color: 'text-indigo-600', bg: 'bg-indigo-50 border-indigo-200' };
-  }
-  // Cualquier otro caso
-  return { label: 'Equilibrio Operativo', sub: 'Distribución balanceada', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' };
+// Umbrales: Alto > 60% del promedio, Bajo < 40%, Normal en el medio
+function clasificar(valor, promedio) {
+  if (promedio === 0) return valor > 0 ? 'alto' : 'bajo';
+  const ratio = valor / promedio;
+  if (ratio > 0.6) return 'alto';
+  if (ratio < 0.4) return 'bajo';
+  return 'normal';
+}
+
+function getDiagnostico(stockAbs, ventasPendientes, efectivoCaja) {
+  const promedio = (stockAbs + ventasPendientes + efectivoCaja) / 3;
+  const stock = clasificar(stockAbs, promedio);
+  const calle = clasificar(ventasPendientes, promedio);
+  const caja = clasificar(efectivoCaja, promedio);
+
+  // 🟢 VERDE
+  if (stock === 'alto' && calle === 'alto' && caja === 'alto') return {
+    label: 'Crecimiento Acelerado',
+    mensaje: 'Tu negocio está creciendo en todos los frentes.',
+    semaforo: 'verde',
+    color: 'text-emerald-700',
+    bg: 'bg-emerald-50 border-emerald-300',
+    dot: 'bg-emerald-500',
+  };
+  if (stock === 'bajo' && calle === 'alto' && caja === 'alto') return {
+    label: 'Ciclo Exitoso',
+    mensaje: 'Vendiste bien y cobrás bien.',
+    semaforo: 'verde',
+    color: 'text-emerald-700',
+    bg: 'bg-emerald-50 border-emerald-300',
+    dot: 'bg-emerald-500',
+  };
+
+  // 🔴 ROJO
+  if (stock === 'bajo' && calle === 'bajo' && caja === 'bajo') return {
+    label: 'Negocio Inactivo',
+    mensaje: 'No hay movimiento en ninguna variable.',
+    semaforo: 'rojo',
+    color: 'text-red-700',
+    bg: 'bg-red-50 border-red-300',
+    dot: 'bg-red-500',
+  };
+  if (stock === 'alto' && calle === 'bajo' && caja === 'bajo') return {
+    label: 'Capital Inmovilizado',
+    mensaje: 'Tu capital está atrapado en stock sin caja ni cobros.',
+    semaforo: 'rojo',
+    color: 'text-red-700',
+    bg: 'bg-red-50 border-red-300',
+    dot: 'bg-red-500',
+  };
+  if (calle === 'alto' && caja === 'bajo') return {
+    label: 'Cobranza Crítica',
+    mensaje: 'Vendiste pero no estás cobrando.',
+    semaforo: 'rojo',
+    color: 'text-red-700',
+    bg: 'bg-red-50 border-red-300',
+    dot: 'bg-red-500',
+  };
+
+  // 🟡 AMARILLO
+  if (stock === 'alto' && caja !== 'bajo') return {
+    label: 'Exceso de Stock',
+    mensaje: 'Tenés más mercadería de la que estás vendiendo.',
+    semaforo: 'amarillo',
+    color: 'text-yellow-700',
+    bg: 'bg-yellow-50 border-yellow-300',
+    dot: 'bg-yellow-500',
+  };
+  if (caja === 'alto' && stock === 'bajo' && calle === 'bajo') return {
+    label: 'Liquidez Sin Actividad',
+    mensaje: 'Tenés caja disponible pero poco movimiento comercial.',
+    semaforo: 'amarillo',
+    color: 'text-yellow-700',
+    bg: 'bg-yellow-50 border-yellow-300',
+    dot: 'bg-yellow-500',
+  };
+
+  // 🟡 DEFAULT
+  return {
+    label: 'Operación Equilibrada',
+    mensaje: 'Tu negocio está estable.',
+    semaforo: 'amarillo',
+    color: 'text-yellow-700',
+    bg: 'bg-yellow-50 border-yellow-300',
+    dot: 'bg-yellow-500',
+  };
 }
 
 export default function FortalezaPanel({ comprasStock, ventasTotales, ventasPendientes, efectivoCaja, peqAlcanzadoTemprano }) {
-  // S = Total Compras - Total Ventas
   const S = comprasStock - ventasTotales;
   const stockAbs = Math.abs(S);
   const esExcedente = S < 0;
-
-  const stockLabel = esExcedente ? 'Excedente de Valor' : 'Capital Invertido';
-  const stockColor = esExcedente ? 'emerald' : 'slate';
 
   const stockIconBg = esExcedente ? 'bg-emerald-100' : 'bg-slate-200';
   const stockIconText = esExcedente ? 'text-emerald-700' : 'text-slate-700';
@@ -34,7 +101,10 @@ export default function FortalezaPanel({ comprasStock, ventasTotales, ventasPend
   const cajaYCalle = efectivoCaja + ventasPendientes;
   const fortalezaTotal = stockAbs + cajaYCalle;
 
-  const rotacion = getRotacionInfo(stockAbs, cajaYCalle);
+  const diagnostico = getDiagnostico(stockAbs, ventasPendientes, efectivoCaja);
+
+  // Emoji semáforo
+  const emojiSemaforo = diagnostico.semaforo === 'verde' ? '🟢' : diagnostico.semaforo === 'rojo' ? '🔴' : '🟡';
 
   return (
     <div className="rounded-2xl overflow-hidden shadow-xl border border-slate-200">
@@ -49,11 +119,16 @@ export default function FortalezaPanel({ comprasStock, ventasTotales, ventasPend
             <p className="text-white text-3xl font-bold">${fortalezaTotal.toLocaleString()}</p>
           </div>
         </div>
-        {/* Badge de eficiencia */}
-        <div className={`mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold ${rotacion.bg} ${rotacion.color}`}>
-          <span className="w-2 h-2 rounded-full bg-current inline-block" />
-          {rotacion.label} · {rotacion.sub}
+
+        {/* Badge diagnóstico con semáforo */}
+        <div className={`mt-3 inline-flex flex-col px-3 py-2 rounded-2xl border ${diagnostico.bg}`}>
+          <div className="flex items-center gap-2">
+            <span className="text-base">{emojiSemaforo}</span>
+            <span className={`text-xs font-bold ${diagnostico.color}`}>{diagnostico.label}</span>
+          </div>
+          <p className={`text-xs mt-0.5 ${diagnostico.color} opacity-80`}>{diagnostico.mensaje}</p>
         </div>
+
         {peqAlcanzadoTemprano && (
           <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold bg-yellow-50 border-yellow-300 text-yellow-700">
             <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" />
@@ -72,7 +147,9 @@ export default function FortalezaPanel({ comprasStock, ventasTotales, ventasPend
               <PackageSearch className={`w-5 h-5 ${stockIconText}`} />
             </div>
             <div>
-              <p className="font-semibold text-slate-700 text-sm">{stockLabel}</p>
+              <p className="font-semibold text-slate-700 text-sm">
+                {esExcedente ? 'Valor Agregado Operativo' : 'Capital Invertido'}
+              </p>
               <p className="text-xs text-slate-400">
                 {esExcedente ? 'Operación autofinanciada · genera valor neto' : 'Dinero en productos aún no vendidos'}
               </p>
@@ -88,7 +165,7 @@ export default function FortalezaPanel({ comprasStock, ventasTotales, ventasPend
               <TrendingUp className="w-5 h-5 text-amber-600" />
             </div>
             <div>
-              <p className="font-semibold text-slate-700 text-sm">La calle</p>
+              <p className="font-semibold text-slate-700 text-sm">La Calle</p>
               <p className="text-xs text-slate-400">Cobros pendientes</p>
             </div>
           </div>
