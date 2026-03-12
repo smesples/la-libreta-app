@@ -116,6 +116,10 @@ export default function Home() {
     .filter(t => t.tipo === 'ingreso' && t.categoria === 'producto' && t.modalidad_pago !== 'a_cuenta')
     .reduce((sum, t) => sum + t.monto, 0);
 
+  const ingresosServicio = transacciones
+    .filter(t => t.tipo === 'ingreso' && t.categoria === 'servicio' && t.modalidad_pago !== 'a_cuenta')
+    .reduce((sum, t) => sum + t.monto, 0);
+
   const ventasPendientes = transacciones
     .filter(t => t.tipo === 'ingreso' && t.modalidad_pago === 'a_cuenta')
     .reduce((sum, t) => sum + t.monto, 0);
