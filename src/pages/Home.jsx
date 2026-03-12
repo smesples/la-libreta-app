@@ -113,7 +113,7 @@ export default function Home() {
     .reduce((sum, t) => sum + t.monto, 0);
 
   const ventasTotales = transacciones
-    .filter(t => t.tipo === 'ingreso' && t.categoria === 'venta')
+    .filter(t => t.tipo === 'ingreso' && t.categoria === 'venta' && t.modalidad_pago !== 'a_cuenta')
     .reduce((sum, t) => sum + t.monto, 0);
 
   const ventasPendientes = transacciones
