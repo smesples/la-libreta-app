@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BotonGrande from '../components/BotonGrande';
 import TarjetaResumen from '../components/TarjetaResumen';
 import ModalRegistro from '../components/ModalRegistro';
+import ModalCobro from '../components/ModalCobro';
 import ListaTransacciones from '../components/ListaTransacciones';
 import FortalezaPanel from '../components/FortalezaPanel';
 import IndicadorPEQ from '../components/IndicadorPEQ';
@@ -16,6 +17,7 @@ import ReporteSolvencia from '../components/ReporteSolvencia';
 export default function Home() {
   const [modalIngreso, setModalIngreso] = useState(false);
   const [modalGasto, setModalGasto] = useState(false);
+  const [transaccionACobrar, setTransaccionACobrar] = useState(null);
 
   const queryClient = useQueryClient();
   const { user, logout } = useAuth();
@@ -43,6 +45,48 @@ export default function Home() {
       setModalIngreso(false);
       setModalGasto(false);
       alert("Error al guardar: " + error.message);
+    }
+  });
+
+  // Mutación: registrar cobro (total o parcial) de una venta "a_cuenta"
+  const registrarCobro = useMutation({
+    mutationFn: async ({ transaccion, montoCobrado, saldoRestante, esParcial }) => {
+      // 1. Actualizar la transacción original: marcarla como cobrada (o reducir monto si parcial)
+      if (esParcial) {
+        // Reducir el monto original al saldo restante
+        await db.Transaccion.update(transaccion.id, {
+          monto: saldoRestante,
+          descripcion: (transaccion.descripcion || transaccion.categoria) + ` (saldo pendiente)`,
+        });
+      } else {
+        // Cobro total: cambiar modalidad a contado
+        await db.Transaccion.update(transaccion.id, {
+          modalidad_pago: 'contado',
+        });
+      }
+
+      // 2. Crear nuevo ingreso en Caja por el monto cobrado (solo si parcial,
+      //    en cobro total el registro original ya existe — solo cambia su modalidad)
+      if (esParcial) {
+        await db.Transaccion.create({
+          usuario_id: user?.id,
+          tipo: 'ingreso',
+          categoria: transaccion.categoria || 'venta',
+          descripcion: `Cobro parcial: ${transaccion.descripcion || transaccion.categoria}`,
+          monto: montoCobrado,
+          modalidad_pago: 'contado',
+          fecha: new Date().toISOString().split('T')[0],
+          es_costo_fijo: false,
+          es_gasto_negocio: true,
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['transacciones'] });
+      setTransaccionACobrar(null);
+    },
+    onError: (error) => {
+      alert("Error al registrar el cobro: " + error.message);
     }
   });
 
@@ -165,7 +209,10 @@ export default function Home() {
 
           {/* Movimientos: lista de transacciones del usuario */}
           <TabsContent value="movimientos" className="mt-3">
-            <ListaTransacciones transacciones={transacciones} />
+            <ListaTransacciones
+              transacciones={transacciones}
+              onCobrar={(t) => setTransaccionACobrar(t)}
+            />
           </TabsContent>
 
           {/* Reporte: Fortaleza completa + historial de solvencia mensual */}
@@ -193,6 +240,12 @@ export default function Home() {
         onClose={() => setModalGasto(false)}
         tipo="gasto"
         onGuardar={(datos) => crearTransaccion.mutateAsync(datos)}
+      />
+      <ModalCobro
+        open={!!transaccionACobrar}
+        transaccion={transaccionACobrar}
+        onClose={() => setTransaccionACobrar(null)}
+        onConfirmar={(payload) => registrarCobro.mutateAsync(payload)}
       />
          {/* ── PIE DE PÁGINA ── */}
       <div className="text-center py-6 text-xs text-slate-400">
