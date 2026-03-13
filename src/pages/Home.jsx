@@ -177,11 +177,13 @@ export default function Home() {
       <div className="max-w-2xl mx-auto p-4 pb-10 space-y-4">
 
         {/* ── ZONA 2: KPIs OPERATIVOS DEL MES ── */}
-        <div className="grid grid-cols-3 gap-3">
-          <TarjetaResumen titulo="Ingresos" valor={ventasMes} color="emerald" />
-          <TarjetaResumen titulo="Gastos" valor={gastosMes} color="red" />
-          <TarjetaResumen titulo="Balance" valor={balanceMes} color={balanceMes >= 0 ? "blue" : "red"} />
-        </div>
+        <div className="grid grid-cols-2 gap-3">
+  <TarjetaResumen titulo="Ingresos" valor={ventasMes} color="emerald" />
+  <TarjetaResumen titulo="Gastos" valor={gastosMes} color="red" />
+  <div className="col-span-2">
+    <TarjetaResumen titulo="Balance" valor={balanceMes} color={balanceMes >= 0 ? "blue" : "red"} />
+  </div>
+</div>
 
         {/* ── ZONA 3: PUNTO DE EQUILIBRIO ── */}
         <IndicadorPEQ gastosMes={gastosMes} ventasMes={ventasMes} />
