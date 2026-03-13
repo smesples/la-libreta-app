@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { db } from '../api/localDB';
 import { useAuth } from '@/lib/AuthContext';
-import { LogOut, ShieldCheck } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BotonGrande from '../components/BotonGrande';
 import TarjetaResumen from '../components/TarjetaResumen';
@@ -133,11 +133,6 @@ export default function Home() {
   const diaHoy = new Date().getDate();
   const peqAlcanzadoTemprano = diaHoy <= 20 && ventasMes >= gastosMes && gastosMes > 0;
 
-  // Fortaleza total para el widget compacto del Home
-  const S = comprasStock - ventasTotales;
-  const stockAbs = Math.abs(S);
-  const fortalezaTotal = stockAbs + efectivoCaja + ventasPendientes;
-
   return (
     <div className="min-h-screen bg-slate-50">
 
@@ -187,18 +182,6 @@ export default function Home() {
 
         {/* ── ZONA 3: PUNTO DE EQUILIBRIO ── */}
         <IndicadorPEQ gastosMes={gastosMes} ventasMes={ventasMes} />
-
-        {/* ── ZONA 4: FORTALEZA COMPACTA — solo el número + acceso al Reporte ── */}
-        <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-2xl px-5 py-4 flex items-center justify-between shadow-lg">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-slate-400 text-xs font-medium uppercase tracking-widest">Mi Fortaleza</p>
-              <p className="text-white text-2xl font-bold">${fortalezaTotal.toLocaleString()}</p>
-            </div>
-          </div>
           
         </div>
 
