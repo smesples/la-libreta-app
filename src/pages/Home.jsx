@@ -180,10 +180,8 @@ export default function Home() {
   </div>
 </div>
 
-        {/* ── ZONA 3: PUNTO DE EQUILIBRIO ── */}
+         {/* ── ZONA 3: PUNTO DE EQUILIBRIO ── */}
         <IndicadorPEQ gastosMes={gastosMes} ventasMes={ventasMes} />
-          
-        </div>
 
         {/* ── TABS: MOVIMIENTOS / REPORTE ── */}
         <Tabs defaultValue="movimientos">
@@ -192,7 +190,6 @@ export default function Home() {
             <TabsTrigger value="reporte" className="flex-1">Reporte</TabsTrigger>
           </TabsList>
 
-          {/* Movimientos: lista de transacciones del usuario */}
           <TabsContent value="movimientos" className="mt-3">
             <ListaTransacciones
               transacciones={transacciones}
@@ -200,7 +197,6 @@ export default function Home() {
             />
           </TabsContent>
 
-          {/* Reporte: Fortaleza completa + historial de solvencia mensual */}
           <TabsContent value="reporte" className="mt-3 space-y-4">
             <FortalezaPanel
               comprasStock={comprasStock}
@@ -213,7 +209,7 @@ export default function Home() {
             <ReporteSolvencia transacciones={transacciones} />
           </TabsContent>
         </Tabs>
-      </div>
+      </div>  {/* ← cierre correcto del max-w-2xl */}
 
       <ModalRegistro
         open={modalIngreso}
